@@ -1,0 +1,10 @@
+all:
+  hosts:
+    vcenter:
+      ansible_host: "10.10.40.21"
+      ansible_user: "administrator@vsphere.local"
+      ansible_password: "P@ssw0rd"
+      ansible_connection: local
+      ansible_python_interpreter: "/usr/bin/python3.10"
+
+

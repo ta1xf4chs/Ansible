@@ -1,0 +1,17 @@
+all:
+  vars:
+#    python -m http.server |PORT| --bind |IP|
+#ex: python -m http.server 9090 --bind 10.10.20.52
+    file_server_ip: 10.10.20.52 # IP ของเครื่องที่แชร์ไฟล์
+    file_server_port: 9090 # PORT ของเครื่องที่แชร์ไฟล์
+    redfish_api_url: "/redfish/v1/UpdateService/Actions/UpdateService.SimpleUpdate" # Endpoint API
+    iso_image_url: "/Desktop/9090/window_server_2019.ISO" # Path ของไฟล์เฟิร์มแวร์
+
+    
+  hosts:
+    idrac_servers:
+      ansible_host: 10.10.40.91
+      ansible_user: root
+      ansible_password: calvin
+      ansible_connection: local
+      ansible_python_interpreter: /usr/bin/python3

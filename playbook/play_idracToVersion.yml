@@ -1,0 +1,83 @@
+- name: Update iDRAC Firmware
+  hosts: all
+  gather_facts: no
+  tasks:
+    # - name: Get iDRAC Firmware Version Before
+    #   uri:
+    #     url: "https://{{ ansible_host }}/redfish/v1/Managers/iDRAC.Embedded.1"
+    #     method: GET
+    #     user: "{{ ansible_user }}"
+    #     password: "{{ ansible_password }}"
+    #     validate_certs: false
+    #   register: idrac_version_before
+
+    # - name: Display iDRAC Firmware Version Before
+    #   debug:
+    #     msg: "iDRAC Firmware Version: {{ idrac_version_before.json.FirmwareVersion }}"
+#_____________________________________________________________________________________
+
+    - name: Upload firmware to iDRAC
+      ansible.builtin.uri:
+        url: "https://{{ ansible_host }}{{ redfish_api_url }}" 
+        method: POST
+        user: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
+        headers:
+          Content-Type: "application/json"
+        body_format: json
+        body:
+          ImageURI: "http://{{ file_server_ip }}:{{ file_server_port }}{{ firmware_path }}"
+          InstallImmediately: true # Install ทันทีหลังจากการดาวน์โหลดเสร็จสิ้น
+          SkipSignatureCheck: true # Skip Signature Check
+        validate_certs: no
+      register: firmware_update_response
+
+    # - name: Extract Task ID from Response
+    #   set_fact:
+    #     task_id: "{{ firmware_update_response.location | regex_search('Tasks/(.*)', '\\1') }}"
+    #   when: firmware_update_response.location is defined
+#_____________________________________________________________________________________
+    
+#     - name: Wait for iDRAC Firmware Update Task to Complete
+#       uri:
+#         url: "https://{{ ansible_host }}/redfish/v1/TaskService/Tasks/{{ task_id }}"
+#         method: GET
+#         user: "{{ ansible_user }}"
+#         password: "{{ ansible_password }}"
+#         validate_certs: false
+#       register: task_status
+#       retries: 30  # ลองเช็คสถานะ 
+#       delay: 60  # รอ 60 วินาทีก่อนเช็คใหม่
+#       until: task_status.json.TaskState not in ['Running', 'New']
+
+#     - name: Display Final Task Status
+#       debug:
+#         msg: "Firmware update task completed with status: {{ task_status.json.TaskState }}"
+      
+#     - name: Handle Task Failure Gracefully
+#       debug:
+#         msg: "⚠️ Firmware update failed with status: {{ task_status.json.TaskState }}. Check logs for more details."
+#       when: task_status.json.TaskState in ['Exception', 'Cancelled']
+#       ignore_errors: yes  # ไม่ให้หยุด Playbook เมื่อเจอข้อผิดพลาด
+#       failed_when: false  # ไม่ล้มเหลวหากงานไม่สำเร็จ
+# #_____________________________________________________________________________________
+    
+#     - name: Get iDRAC Firmware Version After Update
+#       uri:
+#         url: "https://{{ ansible_host }}/redfish/v1/Managers/iDRAC.Embedded.1"
+#         method: GET
+#         user: "{{ ansible_user }}"
+#         password: "{{ ansible_password }}"
+#         validate_certs: false
+#       register: idrac_version_after
+
+#     - name: Display iDRAC Firmware Version After Update
+#       debug:
+#         msg: "Updated iDRAC Firmware Version: {{ idrac_version_after.json.FirmwareVersion }}"
+
+#     - name: Warn if Firmware Version Did Not Change
+#       debug:
+#         msg: "⚠️ Firmware version did not change. Version before: {{ idrac_version_before.json.FirmwareVersion }}, Version after: {{ idrac_version_after.json.FirmwareVersion }}"
+#       when: idrac_version_before.json.FirmwareVersion == idrac_version_after.json.FirmwareVersion
+#       ignore_errors: yes  # แสดงเฉพาะข้อความเตือนและไม่ทำให้ Playbook ล้มเหลว
+#       failed_when: false  # แสดงเฉพาะข้อความเตือนและไม่ล้มเหลว

@@ -1,0 +1,21 @@
+all:
+  hosts:
+    10.10.40.25:
+      ansible_user: ta1
+      ansible_ssh_private_key_file: ~/.ssh/id_rsa
+      ansible_python_interpreter: /usr/bin/python3
+
+    10.10.40.11:
+      ansible_user: ta2
+      ansible_ssh_private_key_file: ~/.ssh/id_rsa
+      ansible_python_interpreter: /usr/bin/python3
+
+    10.10.40.16:
+      ansible_user: ta3
+      ansible_ssh_private_key_file: ~/.ssh/id_rsa
+      ansible_python_interpreter: /usr/bin/python3
+  
+    10.10.40.19:
+      ansible_user: ta4
+      ansible_ssh_private_key_file: ~/.ssh/id_rsa
+      ansible_python_interpreter: /usr/bin/python3

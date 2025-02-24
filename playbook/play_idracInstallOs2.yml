@@ -1,0 +1,105 @@
+- name: Mount Windows ISO and Boot via iDRAC Lifecycle Controller
+  hosts: idrac_servers
+  gather_facts: no
+
+  tasks:
+    - name: 1️⃣ ตรวจสอบว่า ISO ถูกเมานต์อยู่หรือไม่
+      uri:
+        url: "https://{{ ansible_host }}/redfish/v1/Managers/iDRAC.Embedded.1/VirtualMedia/CD"
+        user: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
+        method: GET
+        validate_certs: "{{ validate_certs }}"
+        status_code: 200
+      register: vm_status
+
+    # - name: 2️⃣ ถอด ISO ออกถ้ายังเมานต์อยู่
+    #   uri:
+    #     url: "https://{{ ansible_host }}/redfish/v1/Managers/iDRAC.Embedded.1/VirtualMedia/CD/Actions/VirtualMedia.EjectMedia"
+    #     user: "{{ ansible_user }}"
+    #     password: "{{ ansible_password }}"
+    #     method: POST
+    #     headers:
+    #       Accept: "application/json"
+    #       Content-Type: "application/json"
+    #       OData-Version: "4.0"
+    #     body: "{}"
+    #     status_code: 200,204
+    #     validate_certs: "{{ validate_certs }}"
+    #   when: vm_status.json.Image is defined and vm_status.json.Image
+    #   delegate_to: localhost
+
+    # - name: 3️⃣ เมานต์ Windows ISO ผ่าน Virtual Media
+    #   uri:
+    #     url: "https://{{ ansible_host }}/redfish/v1/Managers/iDRAC.Embedded.1/VirtualMedia/CD/Actions/VirtualMedia.InsertMedia"
+    #     user: "{{ ansible_user }}"
+    #     password: "{{ ansible_password }}"
+    #     method: POST
+    #     body_format: json
+    #     body:
+    #       Image: "{{ iso_image_url }}"
+    #       Inserted: true
+    #     validate_certs: "{{ validate_certs }}"
+    #     status_code: 200,204
+    #   delegate_to: localhost
+
+    # - name: 4️⃣ ตรวจสอบว่า ISO ถูกเมานต์สำเร็จ
+    #   uri:
+    #     url: "https://{{ ansible_host }}/redfish/v1/Managers/iDRAC.Embedded.1/VirtualMedia/CD"
+    #     user: "{{ ansible_user }}"
+    #     password: "{{ ansible_password }}"
+    #     method: GET
+    #     validate_certs: "{{ validate_certs }}"
+    #     status_code: 200
+    #   register: vm_final_status
+    #   failed_when: "'Image' not in vm_final_status.json or vm_final_status.json.Image != iso_image_url"
+    #   delegate_to: localhost
+
+    - name: 5️⃣ ตั้งค่าบูตจาก Virtual Media
+      uri:
+        url: "https://{{ ansible_host }}/redfish/v1/Systems/System.Embedded.1"
+        method: PATCH
+        user: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
+        body_format: json
+        body:
+          Boot:
+            BootSourceOverrideTarget: "Cd"
+            BootSourceOverrideMode: "UEFI"
+        validate_certs: "{{ validate_certs }}"
+        status_code: 204,200
+
+    - name: 6️⃣ รีบูตเซิร์ฟเวอร์เพื่อเริ่มติดตั้ง OS
+      uri:
+        url: "https://{{ ansible_host }}/redfish/v1/Systems/System.Embedded.1/Actions/ComputerSystem.Reset"
+        method: POST
+        user: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
+        body_format: json
+        body:
+          ResetType: "GracefulRestart"
+        validate_certs: "{{ validate_certs }}"
+        status_code: 204,200
+
+    - name: 7️⃣ รอให้เซิร์ฟเวอร์บูตเสร็จ
+      pause:
+        seconds: 180
+
+    - name: 8️⃣ ถอด ISO ออกจาก Virtual Media หลังจากกระบวนการเสร็จสิ้น
+      uri:
+        url: "https://{{ ansible_host }}/redfish/v1/Managers/iDRAC.Embedded.1/VirtualMedia/CD/Actions/VirtualMedia.EjectMedia"
+        user: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
+        method: POST
+        headers:
+          Accept: "application/json"
+          Content-Type: "application/json"
+          OData-Version: "4.0"
+        body: "{}"
+        status_code: 200,204
+        validate_certs: "{{ validate_certs }}"
+      delegate_to: localhost
+
+    - name: ✅ แสดงข้อความเสร็จสิ้น
+      debug:
+        msg: "ISO Mounted, Boot Process Started, and ISO Ejected Successfully!"

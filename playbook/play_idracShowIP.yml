@@ -1,0 +1,21 @@
+- name: Fetch iDRAC information
+  hosts: all
+  tasks:
+    - name: Check connectivity
+      ping:
+
+    - name: Get iDRAC status
+      uri:
+        url: "https://{{ ansible_host }}/redfish/v1/Systems/System.Embedded.1"
+        method: GET
+        user: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
+        validate_certs: no
+      register: idrac_response
+
+    - name: Show iDRAC Status
+      debug:
+        msg:
+          - "iDRAC IP: {{ ansible_host }}"
+          - "Status: {{ idrac_response.json.Status }}"
+          - "Model: {{ idrac_response.json.Model }}"

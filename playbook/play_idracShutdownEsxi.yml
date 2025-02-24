@@ -1,0 +1,24 @@
+- name: Power Control using iDRAC
+  hosts: idrac_server
+  tasks:
+    - name: Check current server power state
+      uri:
+        url: "https://{{ ansible_host }}/redfish/v1/Systems/System.Embedded.1"
+        method: GET
+        user: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
+        validate_certs: false
+        status_code: 200
+      register: server_status
+
+    - name: Shutdown server if powered on
+      uri:
+        url: "https://{{ ansible_host }}/redfish/v1/Systems/System.Embedded.1/Actions/ComputerSystem.Reset"
+        method: POST
+        user: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
+        validate_certs: false
+        body: { "ResetType": "GracefulShutdown" }
+        body_format: json
+        status_code: 204
+      when: server_status.json.PowerState == "On"

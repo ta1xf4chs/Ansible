@@ -1,0 +1,11 @@
+- name: Start Python HTTP Server
+  hosts: windows_ta1
+  tasks:
+    - name: Start HTTP server on port 9090
+      ansible.windows.win_shell: |
+        python -m http.server 9090 --bind 10.10.20.94
+      args:
+        chdir: C:\Users\tawan\Desktop
+      async: 3600  # Run for up to 1 hour
+      poll: 0
+      register: http_server_job

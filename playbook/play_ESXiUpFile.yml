@@ -1,0 +1,8 @@
+- name: Upload hi.txt using copy module
+  hosts: esxi_host
+  gather_facts: no
+  tasks:
+    - name: Copy hi.txt to Datastore folder
+      copy:
+        src: /home/ta1/hi.txt
+        dest: /vmfs/volumes/R730-Datastore/tawan_testUploadFile/hi.txt

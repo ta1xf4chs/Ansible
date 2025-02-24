@@ -1,0 +1,47 @@
+---
+- name: Update iDRAC OS Driver Pack
+  hosts: all
+  gather_facts: no
+  tasks:    
+  - name: Upload firmware file to iDRAC
+    ansible.builtin.uri:
+      url: "https://{{ ansible_host }}/redfish/v1/UpdateService/Actions/UpdateService.SimpleUpdate"
+      method: POST
+      user: "{{ ansible_user }}"
+      password: "{{ ansible_password }}"
+      headers:
+        Content-Type: application/json
+      body_format: json
+      body:
+        ImageURI: "nfs://wsl.localhost/Ubuntu/srv/nfs/Drivers-for-OS-Deployment_Application_WP3PH_WN64_18.12.04_A00_01.EXE"
+      status_code: 202
+      validate_certs: no
+      
+
+
+  - name: Check firmware update status
+    ansible.builtin.uri:
+      url: "{{ update_response.location }}"
+      method: GET
+      user: "{{ ansible_user }}"
+      password: "{{ ansible_password }}"
+      headers:
+        Content-Type: application/json
+      return_content: yes
+      validate_certs: no
+    register: status_response
+    until: status_response.json.Status == "Completed"
+    retries: 30
+    delay: 20
+
+  - name: Verify firmware version
+    ansible.builtin.uri:
+      url: "https://{{ ansible_host }}/redfish/v1/UpdateService/FirmwareInventory"
+      method: GET
+      user: "{{ ansible_user }}"
+      password: "{{ ansible_password }}"
+      headers:
+        Content-Type: application/json
+      return_content: yes
+      validate_certs: no
+    register: firmware_info

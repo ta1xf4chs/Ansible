@@ -1,0 +1,15 @@
+- name: Check iDRAC Firmware Version
+  hosts: all
+  tasks:
+    - name: Get iDRAC Firmware Version
+      uri:
+        url: "https://{{ ansible_host }}/redfish/v1/Managers/iDRAC.Embedded.1"
+        method: GET
+        user: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
+        validate_certs: false
+      register: idrac_version
+
+    - name: Display iDRAC Firmware Version
+      debug:
+        msg: "iDRAC Firmware Version: {{ idrac_version.json.FirmwareVersion }}"

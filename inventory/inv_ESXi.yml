@@ -1,0 +1,10 @@
+all:
+  hosts:
+    esxi_host:
+      ansible_host: 10.10.40.20
+      ansible_user: root
+      ansible_password: P@ssw0rd
+      ansible_connection: local
+      ansible_python_interpreter: "/usr/bin/python3.10"
+      
+

@@ -1,0 +1,39 @@
+all:
+  hosts:
+    windows_vm1:
+      ansible_host: 10.10.40.15
+      ansible_user: Administrator
+      ansible_password: P@ssw0rd
+      ansible_port: 5985
+      ansible_connection: winrm
+      ansible_winrm_transport: basic
+
+    windows_vm2:
+      ansible_host: 10.10.40.14
+      ansible_user: Administrator
+      ansible_password: Aa1234!@
+      ansible_port: 5985
+      ansible_connection: winrm
+      ansible_winrm_transport: basic
+
+    windows_vm3:
+      ansible_host: 10.10.40.23
+      ansible_user: Administrator
+      ansible_password: P@ssw0rd
+      ansible_port: 5985
+      ansible_connection: winrm
+      ansible_winrm_transport: basic
+
+    linux_ta3:
+      ansible_host: 10.10.40.16
+      ansible_user: ta3
+      ansible_password: ta3
+      ansible_ssh_private_key_file: ~/.ssh/id_rsa
+      ansible_python_interpreter: /usr/bin/python3
+  
+    linux_ta4:
+      ansible_host: 10.10.40.19
+      ansible_user: ta4
+      ansible_password: ta4
+      ansible_ssh_private_key_file: ~/.ssh/id_rsa
+      ansible_python_interpreter: /usr/bin/python3

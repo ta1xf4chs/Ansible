@@ -1,0 +1,23 @@
+all:
+  vars:
+    #    python -m http.server |PORT| --bind |IP|
+    #ex: python -m http.server 9090 --bind 10.10.20.127
+    file_server_ip: 192.168.0.121 # IP ของเครื่องที่แชร์ไฟล์
+    file_server_port: 9090 # PORT ของเครื่องที่แชร์ไฟล์
+    redfish_api_url: "/redfish/v1/UpdateService/Actions/UpdateService.SimpleUpdate" # Endpoint API
+    firmware_path: "/Desktop/9090/iDRAC-with-Lifecycle-Controller_Firmware_TNT7C_WN64_7.20.10.05_A00.EXE" # Path ของไฟล์เฟิร์มแวร์
+  hosts:
+    idrac_servers:
+      ansible_host: 192.168.0.120
+      ansible_user: root
+      ansible_password: calvin!
+      ansible_connection: local
+      ansible_python_interpreter: /usr/bin/python3
+
+    idrac_server_93:
+      ansible_host: 10.10.40.93
+      ansible_user: root
+      ansible_password: calvin!
+      ansible_connection: local
+      ansible_python_interpreter: /usr/bin/python3
+      firmware_path: "/93_iDRAC-with-Lifecycle-Controller_Firmware_C2VDG_WN64_7.00.00.174_A00.EXE" # Path ของไฟล์เฟิร์มแวร์

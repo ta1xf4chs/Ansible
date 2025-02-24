@@ -1,0 +1,13 @@
+- name: Power Control using iDRAC
+  hosts: idrac_server
+  tasks:
+    - name: Power On server via iDRAC
+      uri:
+        url: "https://{{ ansible_host }}/redfish/v1/Systems/System.Embedded.1/Actions/ComputerSystem.Reset"
+        method: POST
+        user: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
+        validate_certs: false
+        body: { "ResetType": "On" }
+        body_format: json
+        status_code: 204

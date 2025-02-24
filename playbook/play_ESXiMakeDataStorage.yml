@@ -1,0 +1,19 @@
+---
+- name: Create NFS Datastore on ESXi
+  hosts: esxi_server
+  gather_facts: no
+  tasks:
+    - name: Add NFS Datastore
+      community.vmware.vmware_host_datastore:
+        hostname: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
+        validate_certs: no
+        cluster_name: ""
+        datastore_name: "tawan_testShareFile"
+        datastore_type: "nfs"
+        nfs:
+          host: "10.10.40.25"  # IP ของ NFS server
+          share: "/srv/nfs_share"  # Path ของ NFS share
+          version: 3  # หรือ 4 ตามการตั้งค่า
+      delegate_to: localhost

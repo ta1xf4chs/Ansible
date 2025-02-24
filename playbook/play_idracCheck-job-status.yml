@@ -1,0 +1,19 @@
+---
+- name: Check iDRAC Firmware Update Job Status
+  hosts: idrac_server
+  gather_facts: no
+  vars:
+    job_url: "https://{{ ansible_host }}/redfish/v1/TaskService/Tasks/JID_345382896237"
+  tasks:
+    - name: Get Job Status
+      uri:
+        url: "{{ job_url }}"
+        method: GET
+        user: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
+        validate_certs: no
+      register: job_status
+
+    - name: Display Job Status
+      debug:
+        var: job_status.json

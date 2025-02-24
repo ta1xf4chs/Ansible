@@ -1,0 +1,37 @@
+- name: Create VM on vSphere
+  hosts: vcenter
+  gather_facts: no
+  tasks:
+    - name: Create a new Virtual Machine
+      community.vmware.vmware_guest:
+        hostname: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
+        validate_certs: no
+        cluster: "ITS-Demo-Cluster"
+        datacenter: "ITS-Datacenter"
+        folder: "/vm"
+        name: "tawan_window04"
+        state: poweredon
+        guest_id: windows2016_64Guest  
+        disk:
+          - size_gb: 100
+            type: thin
+            datastore: "R730-Datastore"
+            controller_type: lsilogicsas
+            controller_number: 0
+            unit_number: 0
+        hardware:
+          memory_mb: 8192
+          num_cpus: 4
+          version: 15  # กำหนด Hardware Version
+        networks:
+          - name: "VM Network"
+            start_connected: true
+            adapter_type: e1000e
+        cdrom:
+          - type: iso
+            iso_path: "[R730-Datastore] ISO/Windows Server STD 2019.ISO"
+            state: present
+            controller_number: 0
+            unit_number: 0

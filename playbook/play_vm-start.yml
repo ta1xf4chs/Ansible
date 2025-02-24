@@ -1,0 +1,17 @@
+- name: start
+  hosts: localhost
+  tasks:
+    - name: start
+      community.vmware.vmware_guest_powerstate:
+        hostname: "10.10.40.21"
+        username: "administrator@vsphere.local"
+        password: "P@ssw0rd"
+        validate_certs: no
+        name: "{{ item }}"
+        state: powered-on
+      with_items:
+        - "tawan_window01"
+        - "tawan_window02"
+        - "tawan_window03"
+        - "tawan_linux03"
+        - "tawan_linux04"

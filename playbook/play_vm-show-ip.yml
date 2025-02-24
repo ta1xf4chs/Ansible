@@ -1,0 +1,23 @@
+- name: Retrieve IP Addresses
+  hosts: all
+  tasks:
+    - name: Get IP Address on Windows
+      when: ansible_connection == "winrm"
+      win_shell: |
+        (Get-NetIPAddress -AddressFamily IPv4 | Where-Object { $_.InterfaceAlias -ne "Loopback" }).IPAddress
+      register: ip_result_windows
+
+    - name: Get IP Address on Linux
+      when: ansible_connection != "winrm"
+      shell: hostname -I | awk '{print $1}'
+      register: ip_result_linux
+
+    - name: Display IP Address for Windows
+      when: ansible_connection == "winrm"
+      debug:
+        msg: "Windows VM {{ inventory_hostname }} IP: {{ ip_result_windows.stdout_lines }}"
+
+    - name: Display IP Address for Linux
+      when: ansible_connection != "winrm"
+      debug:
+        msg: "Linux Host {{ inventory_hostname }} IP: {{ ip_result_linux.stdout_lines }}"

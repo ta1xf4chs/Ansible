@@ -1,0 +1,35 @@
+- name: Create Linux VM on vSphere
+  hosts: vcenter
+  gather_facts: no
+  tasks:
+    - name: Create a new virtual machine
+      community.vmware.vmware_guest:
+        hostname: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
+        validate_certs: no
+        cluster: "ITS-Demo-Cluster"
+        datacenter: "ITS-Datacenter"
+        folder: "/vm"
+        name: "tawan_linux04"  # VM Name
+        state: poweredon
+        guest_id: amazonLinux2_64Guest  # Guest OS for Amazon Linux 2
+        disk:
+          - size_gb: 100
+            type: thin
+            datastore: "R730-Datastore"
+            controller_type: paravirtual  # VMware Paravirtual SCSI
+            controller_number: 0
+            unit_number: 0
+        hardware:
+          memory_mb: 8192  # 8 GB of RAM
+          num_cpus: 4  # 4 CPUs
+        networks:
+          - name: "VM Network"
+            start_connected: true
+        cdrom:
+          - type: iso
+            iso_path: "[R730-Datastore] ISO/ubuntu-24.04.1-desktop-amd64.iso"
+            state: present
+            controller_number: 0  # SATA Controller 0
+            unit_number: 0
