@@ -1,0 +1,91 @@
+# # ตรวจสอบ boot options มีอะไรบ้าง
+# ---
+# - name: Get Boot Order Details from iDRAC
+#   hosts: idrac_servers
+#   gather_facts: no
+#   tasks:
+#     - name: Retrieve boot options
+#       uri:
+#         url: "https://{{ ansible_host }}/redfish/v1/Systems/System.Embedded.1/BootOptions"
+#         method: GET
+#         user: "{{ ansible_user }}"
+#         password: "{{ ansible_password }}"
+#         headers:
+#           Content-Type: "application/json"
+#         validate_certs: no
+#         force_basic_auth: yes
+#         status_code: 200,204
+#       register: boot_options
+
+#     - debug:
+#         msg: "{{ boot_options.json }}"
+
+#===========================================================================================================
+#===========================================================================================================
+
+# ---
+# - name: Get Each Boot Option Details from iDRAC
+#   hosts: idrac_servers
+#   gather_facts: no
+#   tasks:
+#     - name: Retrieve detailed boot options
+#       uri:
+#         url: "https://{{ ansible_host }}/redfish/v1/Systems/System.Embedded.1/BootOptions/{{ item }}"
+#         method: GET
+#         user: "{{ ansible_user }}"
+#         password: "{{ ansible_password }}"
+#         headers:
+#           Content-Type: "application/json"
+#         validate_certs: no
+#         force_basic_auth: yes
+#         status_code: 200,204
+#       # Boot000X มาใส่เพื่อดูรายละเอียด เมื่อเสร็จเเล้วใ้ห้หา "DisplayName": "Virtual Optical Drive" แล้วตั้งค่าเป็นลำดับเเรก
+#       loop:
+#         - Boot0006
+#         - Boot0005
+#         - Boot000A
+#         - Boot0004
+#         - Boot0007
+#       register: boot_details
+
+#     - debug:
+#         msg: "{{ boot_details.results }}"
+
+#===========================================================================================================
+#===========================================================================================================
+
+---
+- name: Set Virtual Optical Drive as First Boot Option
+  hosts: idrac_servers
+  gather_facts: no
+  tasks:
+    - name: Change Boot Order to Prioritize Virtual Optical Drive
+      uri:
+        url: "https://{{ ansible_host }}/redfish/v1/Systems/System.Embedded.1"
+        method: PATCH
+        user: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
+        body_format: json
+        body:
+          Boot:
+            # ตั้งลำดับที่ต้องการ อันไหนไม่มีไม่ต้องใส่
+            BootOrder: ["Boot0007",  "Boot0006", "Boot0005","Boot0004", "Boot000A",]
+        headers:
+          Content-Type: "application/json"
+        validate_certs: no
+        force_basic_auth: yes
+        status_code: 200,204
+    - name: Restart the Server
+      uri:
+        url: "https://{{ ansible_host }}/redfish/v1/Systems/System.Embedded.1/Actions/ComputerSystem.Reset"
+        method: POST
+        user: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
+        body_format: json
+        body:
+          ResetType: "ForceRestart"
+        headers:
+          Content-Type: "application/json"
+        validate_certs: no
+        force_basic_auth: yes
+        status_code: 200,204
