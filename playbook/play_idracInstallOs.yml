@@ -1,4 +1,4 @@
-#ไฟล์ทดลอง Mounted ได้เเต่ยังบูตไม่ได้
+#ไฟล์ทดลอง Mounted ได้เเต่ยังบูตไม่ได้ iDRAC9
 
 - name: Boot and Install OS from Mounted ISO
   hosts: idrac_servers
