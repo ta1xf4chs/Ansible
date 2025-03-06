@@ -2,7 +2,8 @@
   hosts: all
   gather_facts: no
   tasks:
-    # - name: Get iDRAC Firmware Version Before
+    #Show iDRAC Firmware Version
+    # - name: Get iDRAC Firmware Version Before 
     #   uri:
     #     url: "https://{{ ansible_host }}/redfish/v1/Managers/iDRAC.Embedded.1"
     #     method: GET
@@ -15,7 +16,9 @@
     #   debug:
     #     msg: "iDRAC Firmware Version: {{ idrac_version_before.json.FirmwareVersion }}"
 #_____________________________________________________________________________________
+#_____________________________________________________________________________________
 
+    #Change Version
     - name: Upload firmware to iDRAC
       ansible.builtin.uri:
         url: "https://{{ ansible_host }}{{ redfish_api_url }}" 
@@ -36,6 +39,7 @@
     #   set_fact:
     #     task_id: "{{ firmware_update_response.location | regex_search('Tasks/(.*)', '\\1') }}"
     #   when: firmware_update_response.location is defined
+#_____________________________________________________________________________________
 #_____________________________________________________________________________________
     
 #     - name: Wait for iDRAC Firmware Update Task to Complete
@@ -60,7 +64,8 @@
 #       when: task_status.json.TaskState in ['Exception', 'Cancelled']
 #       ignore_errors: yes  # ไม่ให้หยุด Playbook เมื่อเจอข้อผิดพลาด
 #       failed_when: false  # ไม่ล้มเหลวหากงานไม่สำเร็จ
-# #_____________________________________________________________________________________
+#_____________________________________________________________________________________
+#_____________________________________________________________________________________
     
 #     - name: Get iDRAC Firmware Version After Update
 #       uri:
