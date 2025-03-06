@@ -1,5 +1,7 @@
+#ต้องเมาส์ไฟล์ก่อน
+
 ---
-- name: Get Boot Order Details from iDRAC
+- name: Get Boot Order Details from iDRAC #ตรวจสอบบูตใน iDRAC ว่ามีอะไรบ้าง
   hosts: idrac_servers
   gather_facts: no
   tasks:
@@ -30,7 +32,7 @@
 #===========================================================================================================
 #===========================================================================================================
 
-    - name: Retrieve detailed boot options
+    - name: Retrieve detailed boot options #ตรวจสอบบูตใน iDRAC ว่าแต่ละอันเป็นบูตอะไร
       uri:
         url: "https://{{ ansible_host }}/redfish/v1/Systems/System.Embedded.1/BootOptions/{{ item }}"
         method: GET
@@ -55,7 +57,7 @@
 #===========================================================================================================
 #===========================================================================================================
 
-    - name: Retrieve detailed boot options
+    - name: Retrieve detailed boot options #เปลี่ยนลำดับการบูตให้บูตจากไฟล์ที่เมาส์เป็นลำดับเเรก (Virtual Optical Drive)
       uri:
         url: "https://{{ ansible_host }}/redfish/v1/Systems/System.Embedded.1/BootOptions/{{ item }}"
         method: GET
