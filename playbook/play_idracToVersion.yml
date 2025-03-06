@@ -1,3 +1,5 @@
+#ใช้ inv_idrac.yml
+
 - name: Update iDRAC Firmware
   hosts: all
   gather_facts: no
