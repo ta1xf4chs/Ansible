@@ -1,0 +1,135 @@
+---
+- name: Get Boot Order Details from iDRAC
+  hosts: idrac_servers
+  gather_facts: no
+  tasks:
+    - name: Retrieve boot options
+      uri:
+        url: "https://{{ ansible_host }}/redfish/v1/Systems/System.Embedded.1/BootOptions"
+        method: GET
+        user: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
+        headers:
+          Content-Type: "application/json"
+        validate_certs: no
+        force_basic_auth: yes
+        status_code: 200,204
+      register: boot_options
+
+    - name: Debug Boot Options JSON Structure
+      debug:
+        var: boot_options.json
+
+    - name: Extract Boot Option IDs safely using json_query
+      set_fact:
+        boot_option_ids: "{{ boot_options.json | json_query('Members[*].\"@odata.id\"') | map('regex_replace', '^.*/', '') | list }}"
+    - name: Debug Extracted Boot Option IDs
+      debug:
+        msg: "Boot Options IDs: {{ boot_option_ids }}"
+
+#===========================================================================================================
+#===========================================================================================================
+
+    - name: Retrieve detailed boot options
+      uri:
+        url: "https://{{ ansible_host }}/redfish/v1/Systems/System.Embedded.1/BootOptions/{{ item }}"
+        method: GET
+        user: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
+        headers:
+          Content-Type: "application/json"
+        validate_certs: no
+        force_basic_auth: yes
+        status_code: 200,204
+      loop: "{{ boot_option_ids }}"
+      when: boot_option_ids | length > 0
+      register: boot_details
+
+    - name: Debug Retrieved Boot Details with DisplayName
+      debug:
+        msg: "Boot Option: {{ item.json.Id }} - DisplayName: {{ item.json.DisplayName | default('N/A') }}"
+      loop: "{{ boot_details.results }}"
+      loop_control:
+        label: "{{ item.json.Id }}"
+
+#===========================================================================================================
+#===========================================================================================================
+
+    - name: Retrieve detailed boot options
+      uri:
+        url: "https://{{ ansible_host }}/redfish/v1/Systems/System.Embedded.1/BootOptions/{{ item }}"
+        method: GET
+        user: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
+        headers:
+          Content-Type: "application/json"
+        validate_certs: no
+        force_basic_auth: yes
+        status_code: 200,204
+      loop: "{{ boot_option_ids }}"
+      when: boot_option_ids | length > 0
+      register: boot_details
+
+    - name: Debug Retrieved Boot Details with DisplayName
+      debug:
+        msg: "Boot Option: {{ item.json.Id }} - DisplayName: {{ item.json.DisplayName | default('N/A') }}"
+      loop: "{{ boot_details.results }}"
+      loop_control:
+        label: "{{ item.json.Id }}"
+
+    - name: Identify Virtual Optical Drive Boot ID
+      set_fact:
+        virtual_optical_boot: "{{ item.json.Id }}"
+      loop: "{{ boot_details.results }}"
+      when: "item.json.DisplayName is defined and item.json.DisplayName == 'Virtual Optical Drive'"
+
+    - name: Retrieve current boot order
+      uri:
+        url: "https://{{ ansible_host }}/redfish/v1/Systems/System.Embedded.1"
+        method: GET
+        user: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
+        headers:
+          Content-Type: "application/json"
+        validate_certs: no
+        force_basic_auth: yes
+        status_code: 200,204
+      register: current_boot_order
+
+    - name: Extract current first boot device
+      set_fact:
+        current_first_boot: "{{ current_boot_order.json.Boot.BootOrder[0] }}"
+      when: "current_boot_order.json.Boot.BootOrder is defined and current_boot_order.json.Boot.BootOrder | length > 0"
+
+    - name: Change Boot Order to Prioritize Virtual Optical Drive
+      uri:
+        url: "https://{{ ansible_host }}/redfish/v1/Systems/System.Embedded.1"
+        method: PATCH
+        user: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
+        body_format: json
+        body:
+          Boot:
+            BootOrder: "{{ [virtual_optical_boot] + (boot_option_ids | difference([virtual_optical_boot])) }}"
+        headers:
+          Content-Type: "application/json"
+        validate_certs: no
+        force_basic_auth: yes
+        status_code: 200,204
+      when: virtual_optical_boot is defined and current_first_boot != virtual_optical_boot
+
+    - name: Restart the Server
+      uri:
+        url: "https://{{ ansible_host }}/redfish/v1/Systems/System.Embedded.1/Actions/ComputerSystem.Reset"
+        method: POST
+        user: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
+        body_format: json
+        body:
+          ResetType: "ForceRestart"
+        headers:
+          Content-Type: "application/json"
+        validate_certs: no
+        force_basic_auth: yes
+        status_code: 200,204
+      
