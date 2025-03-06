@@ -1,3 +1,4 @@
+#start http.server on window
 - name: Start Python HTTP Server
   hosts: windows_ta1
   tasks:
